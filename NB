@@ -37,21 +37,6 @@ accuracy_test = accuracy_score(y_test, y_pred_test)
 
 cv_scores = cross_val_score(model, X_train_selected, y_train, cv=10)
 
-#importance = np.abs(model.theta_[0])
-#feature_names = np.array(X_train.columns)[selector.get_support()]
-#ranked_features = [feature for _, feature in sorted(zip(importance, feature_names), key=lambda x: x[0], reverse=True)]
-
-#fig, ax = plt.subplots(figsize=(10, 6))
-#ax.barh(range(len(importance)), sorted(importance, reverse=True))
-#ax.set_yticks(range(len(importance)))
-#ax.set_yticklabels(ranked_features)
-#ax.set_ylabel('Features', fontsize=20, fontname='Arial')
-#ax.set_xlabel('Importance', fontsize=20, fontname='Arial')
-#plt.gca().invert_yaxis()
-#plt.yticks(fontsize=15, fontname='Arial')
-#prop = fm.FontProperties(family='Arial')
-#plt.show()
-
 print("Best var_smoothing: ", best_params['var_smoothing'])
 
 print("Train Accuracy: ", accuracy_train)
@@ -110,9 +95,3 @@ print("Test Root Mean Squared Error: ", rmse_test)
 print("Test Log Loss: ", logloss_test)
 print("Test AUC-ROC: ", auc_roc_test)
 print("Test R-squared: ", r_squared_test)
-
-#train_results = pd.DataFrame({'Train_Actual_Label': y_train, 'Train_Predicted_Probability': model.predict_proba(X_train_selected)[:, 1]})
-#test_results = pd.DataFrame({'Test_Actual_Label': y_test, 'Test_Predicted_Probability': model.predict_proba(X_test_selected)[:, 1]})
-
-#results = pd.concat([train_results, test_results], axis=1)
-#results.to_excel('NB.xlsx', index=False)
