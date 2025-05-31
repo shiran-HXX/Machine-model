@@ -1,0 +1,118 @@
+import pandas as pd
+import numpy as np
+from sklearn.naive_bayes import GaussianNB
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, \
+    log_loss, roc_auc_score, r2_score, mean_squared_log_error
+import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+
+train_data = pd.read_excel("Training Set.xlsx")
+test_data = pd.read_excel("Test Set.xlsx")
+
+X_train = train_data.iloc[:, :-1]
+y_train = train_data.iloc[:, -1]
+
+X_test = test_data.iloc[:, :-1]
+y_test = test_data.iloc[:, -1]
+
+selector = VarianceThreshold(threshold=0.01)
+X_train_selected = selector.fit_transform(X_train)
+X_test_selected = selector.transform(X_test)
+
+param_grid = {'var_smoothing': np.logspace(0, -9, num=100)}  
+grid = GridSearchCV(estimator=GaussianNB(), param_grid=param_grid, scoring='accuracy', cv=10)
+grid.fit(X_train_selected, y_train)
+best_params = grid.best_params_
+
+model = GaussianNB(var_smoothing=best_params['var_smoothing'])
+model.fit(X_train_selected, y_train)
+y_pred_train = model.predict(X_train_selected)
+y_pred_test = model.predict(X_test_selected)
+
+accuracy_train = accuracy_score(y_train, y_pred_train)
+
+accuracy_test = accuracy_score(y_test, y_pred_test)
+
+cv_scores = cross_val_score(model, X_train_selected, y_train, cv=10)
+
+#importance = np.abs(model.theta_[0])
+#feature_names = np.array(X_train.columns)[selector.get_support()]
+#ranked_features = [feature for _, feature in sorted(zip(importance, feature_names), key=lambda x: x[0], reverse=True)]
+
+#fig, ax = plt.subplots(figsize=(10, 6))
+#ax.barh(range(len(importance)), sorted(importance, reverse=True))
+#ax.set_yticks(range(len(importance)))
+#ax.set_yticklabels(ranked_features)
+#ax.set_ylabel('Features', fontsize=20, fontname='Arial')
+#ax.set_xlabel('Importance', fontsize=20, fontname='Arial')
+#plt.gca().invert_yaxis()
+#plt.yticks(fontsize=15, fontname='Arial')
+#prop = fm.FontProperties(family='Arial')
+#plt.show()
+
+print("Best var_smoothing: ", best_params['var_smoothing'])
+
+print("Train Accuracy: ", accuracy_train)
+
+print("Test Accuracy: ", accuracy_test)
+
+print("Cross-validation scores: ", cv_scores)
+
+precision_train = precision_score(y_train, y_pred_train)
+
+recall_train = recall_score(y_train, y_pred_train)
+
+f1_train = f1_score(y_train, y_pred_train)
+
+mse_train = mean_squared_error(y_train, y_pred_train)
+
+rmse_train = np.sqrt(mse_train)
+
+logloss_train = mean_squared_log_error(y_train, y_pred_train)
+
+auc_roc_train = roc_auc_score(y_train, y_pred_train)
+
+r_squared_train = r2_score(y_train, y_pred_train)
+
+print("Train Accuracy: ", accuracy_train)
+print("Train Precision: ", precision_train)
+print("Train Recall: ", recall_train)
+print("Train F1 Score: ", f1_train)
+print("Train Mean Squared Error: ", mse_train)
+print("Train Root Mean Squared Error: ", rmse_train)
+print("Train Log Loss: ", logloss_train)
+print("Train AUC-ROC: ", auc_roc_train)
+print("Train R-squared: ", r_squared_train)
+
+precision_test = precision_score(y_test, y_pred_test)
+
+recall_test = recall_score(y_test, y_pred_test)
+
+f1_test = f1_score(y_test, y_pred_test)
+
+mse_test = mean_squared_error(y_test, y_pred_test)
+
+rmse_test = np.sqrt(mse_test)
+
+logloss_test = mean_squared_log_error(y_test, y_pred_test)
+
+auc_roc_test = roc_auc_score(y_test, y_pred_test)
+
+r_squared_test = r2_score(y_test, y_pred_test)
+
+print("Test Precision: ", precision_test)
+print("Test Recall: ", recall_test)
+print("Test F1 Score: ", f1_test)
+print("Test Mean Squared Error: ", mse_test)
+print("Test Root Mean Squared Error: ", rmse_test)
+print("Test Log Loss: ", logloss_test)
+print("Test AUC-ROC: ", auc_roc_test)
+print("Test R-squared: ", r_squared_test)
+
+#train_results = pd.DataFrame({'Train_Actual_Label': y_train, 'Train_Predicted_Probability': model.predict_proba(X_train_selected)[:, 1]})
+#test_results = pd.DataFrame({'Test_Actual_Label': y_test, 'Test_Predicted_Probability': model.predict_proba(X_test_selected)[:, 1]})
+
+#results = pd.concat([train_results, test_results], axis=1)
+#results.to_excel('NB.xlsx', index=False)
