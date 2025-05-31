@@ -84,18 +84,3 @@ print("Test Log Loss:", test_log_loss)
 print("Test AUC-ROC:", test_auc_roc)
 print("Test R-squared:", test_r2)
 
-train_results = pd.DataFrame({
-    'Train_Actual_Label': y_train,
-    'Train_Predicted_Probability': y_train_pred,
-    'Train_Predicted_Class': y_train_pred_class
-})
-
-test_results = pd.DataFrame({
-    'Test_Actual_Label': y_test,
-    'Test_Predicted_Probability': y_pred,
-    'Test_Predicted_Class': y_pred_class
-})
-
-results = pd.concat([train_results, test_results], axis=1)
-
-results.to_excel('BRR.xlsx', index=False)
