@@ -1,0 +1,101 @@
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import BayesianRidge
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error
+from sklearn.metrics import roc_auc_score, r2_score
+from sklearn.metrics import log_loss
+
+
+train_data = pd.read_excel("Training Set.xlsx")
+
+test_data = pd.read_excel("Test Set.xlsx")
+
+X_train = train_data.iloc[:, :-1]  
+y_train = train_data.iloc[:, -1]   
+
+X_test = test_data.iloc[:, :-1]  
+y_test = test_data.iloc[:, -1]   
+
+model = BayesianRidge()
+
+param_grid = {
+    'alpha_1': [1e-6, 1e-5, 1e-4],
+    'alpha_2': [1e-6, 1e-5, 1e-4],
+    'lambda_1': [1e-6, 1e-5, 1e-4],
+    'lambda_2': [1e-6, 1e-5, 1e-4]
+}
+
+grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=10, scoring='neg_mean_squared_error')
+grid_search.fit(X_train, y_train)
+
+
+best_params = grid_search.best_params_
+print("Best parameters:", best_params)
+
+model = BayesianRidge(**best_params)
+model.fit(X_train, y_train)
+
+y_train_pred = model.predict(X_train)
+y_train_pred_class = np.where(y_train_pred > 0.5, 1, 0)
+
+y_pred = model.predict(X_test)
+y_pred_class = np.where(y_pred > 0.5, 1, 0)
+
+train_accuracy = accuracy_score(y_train, y_train_pred_class)
+train_precision = precision_score(y_train, y_train_pred_class)
+train_recall = recall_score(y_train, y_train_pred_class)
+train_f1 = f1_score(y_train, y_train_pred_class)
+train_mse = mean_squared_error(y_train, y_train_pred_class)
+train_rmse = np.sqrt(train_mse)
+train_log_loss = log_loss(y_train, y_train_pred)
+train_auc_roc = roc_auc_score(y_train, y_train_pred)
+train_r2 = r2_score(y_train, y_train_pred_class)
+
+print("\n===== Train Set Metrics =====")
+print("Train Accuracy:", train_accuracy)
+print("Train Precision:", train_precision)
+print("Train Recall:", train_recall)
+print("Train F1 Score:", train_f1)
+print("Train Mean Squared Error:", train_mse)
+print("Train Root Mean Squared Error:", train_rmse)
+print("Train Log Loss:", train_log_loss)
+print("Train AUC-ROC:", train_auc_roc)
+print("Train R-squared:", train_r2)
+
+test_accuracy = accuracy_score(y_test, y_pred_class)
+test_precision = precision_score(y_test, y_pred_class)
+test_recall = recall_score(y_test, y_pred_class)
+test_f1 = f1_score(y_test, y_pred_class)
+test_mse = mean_squared_error(y_test, y_pred_class)
+test_rmse = np.sqrt(test_mse)
+test_log_loss = log_loss(y_test, y_pred)
+test_auc_roc = roc_auc_score(y_test, y_pred)
+test_r2 = r2_score(y_test, y_pred_class)
+
+print("\n===== Test Set Metrics =====")
+print("Test Accuracy:", test_accuracy)
+print("Test Precision:", test_precision)
+print("Test Recall:", test_recall)
+print("Test F1 Score:", test_f1)
+print("Test Mean Squared Error:", test_mse)
+print("Test Root Mean Squared Error:", test_rmse)
+print("Test Log Loss:", test_log_loss)
+print("Test AUC-ROC:", test_auc_roc)
+print("Test R-squared:", test_r2)
+
+train_results = pd.DataFrame({
+    'Train_Actual_Label': y_train,
+    'Train_Predicted_Probability': y_train_pred,
+    'Train_Predicted_Class': y_train_pred_class
+})
+
+test_results = pd.DataFrame({
+    'Test_Actual_Label': y_test,
+    'Test_Predicted_Probability': y_pred,
+    'Test_Predicted_Class': y_pred_class
+})
+
+results = pd.concat([train_results, test_results], axis=1)
+
+results.to_excel('BRR.xlsx', index=False)
