@@ -109,4 +109,4 @@ test_results = pd.DataFrame({'Test_Actual_Label': y_test, 'Test_Predicted_Probab
 # 合并训练集和测试集的结果
 results = pd.concat([train_results, test_results], axis=1)
 # 将结果保存到Excel表格
-results.to_excel('E:/创新创业类资料/论文/20250524慢性共病论文亚组分析/性别亚组1的XGBoost预测结果.xlsx', index=False)
+results.to_excel('XGBoost.xlsx', index=False)
