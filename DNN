@@ -66,27 +66,3 @@ print('Test Mean Squared Error (MSE):', test_mse)
 print('Test Root Mean Squared Error (RMSE):', test_rmse)
 print('Test Log Loss:', test_log_loss)
 print('Test R-squared:', test_r2)
-
-#importance = np.abs(model.coefs_[0]).sum(axis=1) 
-#feature_names = X_train.columns
-#sorted_index = importance.argsort()  
-#sorted_feature_names = feature_names[sorted_index]
-
-#plt.figure(figsize=(10, 6))
-#plt.barh(range(len(sorted_index)), importance[sorted_index], align='center')
-#plt.yticks(range(len(sorted_index)), sorted_feature_names)
-#plt.xlabel('Importance', fontsize=20, fontname='Arial')
-#plt.ylabel('Feature', fontsize=20, fontname='Arial')
-#plt.yticks(fontsize=15, fontname='Arial')
-#plt.show()
-
-#train_results = pd.DataFrame({'Train_Actual_Label': y_train, 'Train_Predicted_Probability': model.predict_proba(X_train)[:, 1]})
-#test_results = pd.DataFrame({'Test_Actual_Label': y_test, 'Test_Predicted_Probability': model.predict_proba(X_test)[:, 1]})
-
-#results = pd.concat([train_results, test_results], axis=1)
-
-#results.to_excel('DNN.xlsx', index=False)
-
-
-
-
