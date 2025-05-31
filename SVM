@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score, log_loss
+
+train_data = pd.read_excel("Training Set.xlsx")
+
+test_data = pd.read_excel("Test Set.xlsx")
+
+X_train = train_data.iloc[:, :-1]  
+y_train = train_data.iloc[:, -1]   
+
+X_test = test_data.iloc[:, :-1]  
+y_test = test_data.iloc[:, -1]   
+
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+svm_model = SVC(probability=True, kernel='linear', random_state=42)
+
+svm_model.fit(X_train_scaled, y_train)
+
+y_train_pred = svm_model.predict(X_train_scaled)
+y_test_pred = svm_model.predict(X_test_scaled)
+
+accuracy_train = accuracy_score(y_train, y_train_pred)
+precision_train = precision_score(y_train, y_train_pred, average='weighted', zero_division=0)
+recall_train = recall_score(y_train, y_train_pred, average='weighted')
+f1_train = f1_score(y_train, y_train_pred, average='weighted')
+mse_train = mean_squared_error(y_train, y_train_pred)
+rmse_train = mean_squared_error(y_train, y_train_pred, squared=False)
+logloss_train = log_loss(y_train, svm_model.predict_proba(X_train_scaled))
+r2_train = r2_score(y_train, y_train_pred)
+
+accuracy_test = accuracy_score(y_test, y_test_pred)
+precision_test = precision_score(y_test, y_test_pred, average='weighted', zero_division=0)
+recall_test = recall_score(y_test, y_test_pred, average='weighted')
+f1_test = f1_score(y_test, y_test_pred, average='weighted')
+mse_test = mean_squared_error(y_test, y_test_pred)
+rmse_test = mean_squared_error(y_test, y_test_pred, squared=False)
+logloss_test = log_loss(y_test, svm_model.predict_proba(X_test_scaled))
+r2_test = r2_score(y_test, y_test_pred)
+
+print('Training set accuracy: ', accuracy_train)
+print('Training set precision: ', precision_train)
+print('Training set recall: ', recall_train)
+print('Training set F1 score: ', f1_train)
+print('Training set Mean Squared Error: ', mse_train)
+print('Training set Root Mean Squared Error: ', rmse_train)
+print('Training set Log Loss: ', logloss_train)
+print('Training set R-squared: ', r2_train)
+print('Test set accuracy: ', accuracy_test)
+print('Test set precision: ', precision_test)
+print('Test set recall: ', recall_test)
+print('Test set F1 score: ', f1_test)
+print('Test set Mean Squared Error: ', mse_test)
+print('Test set Root Mean Squared Error: ', rmse_test)
+print('Test set Log Loss: ', logloss_test)
+print('Test set R-squared: ', r2_test)
