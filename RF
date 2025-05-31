@@ -1,0 +1,94 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, \
+    r2_score, log_loss
+from sklearn.preprocessing import LabelEncoder
+from sklearn.pipeline import make_pipeline
+from sklearn.compose import make_column_transformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+import warnings
+import matplotlib.pyplot as plt 
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
+train_data = pd.read_excel("Training Set.xlsx")
+
+test_data = pd.read_excel("Test Set.xlsx")
+
+
+X_train = train_data.iloc[:, :-1]  
+y_train = train_data.iloc[:, -1]   
+
+X_test = test_data.iloc[:, :-1]  
+y_test = test_data.iloc[:, -1]  
+
+numeric_features = X_train.select_dtypes(include=['int64', 'float64']).columns
+categorical_features = X_train.select_dtypes(include=['object']).columns
+
+preprocessor = make_column_transformer(
+    (StandardScaler(), numeric_features),
+    (make_pipeline(SimpleImputer(strategy='most_frequent'), LabelEncoder()), categorical_features)
+)
+
+X_train_scaled = preprocessor.fit_transform(X_train)
+X_test_scaled = preprocessor.transform(X_test)
+
+rf_model = RandomForestClassifier()
+
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [5, 10, 15]
+}
+
+grid_search = GridSearchCV(rf_model, param_grid, cv=10)
+grid_search.fit(X_train_scaled, y_train)
+
+best_rf_model = grid_search.best_estimator_
+
+cv_scores = cross_val_score(best_rf_model, X_train_scaled, y_train, cv=10)
+
+y_train_pred = best_rf_model.predict(X_train_scaled)
+train_accuracy = accuracy_score(y_train, y_train_pred)
+train_precision = precision_score(y_train, y_train_pred, average='weighted', zero_division=1)
+train_recall = recall_score(y_train, y_train_pred, average='weighted', zero_division=1)
+train_f1 = f1_score(y_train, y_train_pred, average='weighted', zero_division=1)
+
+y_test_pred = best_rf_model.predict(X_test_scaled)
+test_accuracy = accuracy_score(y_test, y_test_pred)
+test_precision = precision_score(y_test, y_test_pred, average='weighted', zero_division=1)
+test_recall = recall_score(y_test, y_test_pred, average='weighted', zero_division=1)
+test_f1 = f1_score(y_test, y_test_pred, average='weighted', zero_division=1)
+
+mse_train = mean_squared_error(y_train, y_train_pred)
+rmse_train = np.sqrt(mse_train)
+
+mse_test = mean_squared_error(y_test, y_test_pred)
+rmse_test = np.sqrt(mse_test)
+
+train_log_loss = log_loss(y_train, best_rf_model.predict_proba(X_train_scaled))
+
+test_log_loss = log_loss(y_test, best_rf_model.predict_proba(X_test_scaled))
+
+r2_train = r2_score(y_train, y_train_pred)
+
+r2_test = r2_score(y_test, y_test_pred)
+
+print("Training set accuracy:", train_accuracy)
+print("Training set precision:", train_precision)
+print("Training set recall:", train_recall)
+print("Training set F1 score:", train_f1)
+print("Training set MSE:", mse_train)
+print("Training set RMSE:", rmse_train)
+print("Training set Log Loss:", train_log_loss)
+print("Training set R-squared:", r2_train)
+print("Test set accuracy:", test_accuracy)
+print("Test set precision:", test_precision)
+print("Test set recall:", test_recall)
+print("Test set F1 score:", test_f1)
+print("Test set MSE:", mse_test)
+print("Test set RMSE:", rmse_test)
+print("Test set Log Loss:", test_log_loss)
+print("Test set R-squared:", r2_test)
